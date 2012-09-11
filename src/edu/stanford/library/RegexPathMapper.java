@@ -17,16 +17,24 @@ public class RegexPathMapper implements IdMapper {
     private static final String internalScheme = "file";
     private IdMapper fallbackMapper;
 	private Pattern pattern;
+	private boolean append_full_pid_to_internal_id;
     
     public RegexPathMapper(Pattern pattern) {
-    	this.pattern = pattern;   	
-        this.fallbackMapper = new TrivialIdMapper();
+        this(pattern, new TrivialIdMapper(), false);
     }
     
-    public RegexPathMapper(Pattern input_pattern, IdMapper fallbackMapper) {
-    	this(input_pattern);
-    	
+    public RegexPathMapper(Pattern pattern, boolean append_full_pid_to_internal_id) {
+        this(pattern, new TrivialIdMapper(), append_full_pid_to_internal_id);
+    }
+    
+    public RegexPathMapper(Pattern pattern, IdMapper fallbackMapper) {
+        this(pattern, fallbackMapper, false);
+    }
+
+    public RegexPathMapper(Pattern pattern, IdMapper fallbackMapper, boolean append_full_pid_to_internal_id) {
+    	this.pattern = pattern;
     	this.fallbackMapper = fallbackMapper; 	
+        this.append_full_pid_to_internal_id = append_full_pid_to_internal_id;
     }
     
 	@Override
@@ -34,16 +42,22 @@ public class RegexPathMapper implements IdMapper {
 		String fullPath = internalId.toString().substring(5);
 		
 		String[] pathComponents = fullPath.split("/");
-		StringBuilder builder = new StringBuilder();
 		
-		builder.append(decode(pathComponents[0]));
-		builder.append(":");
-		
-		for (int i=1; i<pathComponents.length; i++) {
-			builder.append(decode(pathComponents[i]));
+		if(append_full_pid_to_internal_id == true) {
+			 int i = fullPath.lastIndexOf('/');
+			 return URI.create(decode(fullPath.substring(i + 1)));
+		} else {
+			StringBuilder builder = new StringBuilder();
+			
+			builder.append(decode(pathComponents[0]));
+			builder.append(":");
+			
+			for (int i=1; i<pathComponents.length; i++) {
+				builder.append(decode(pathComponents[i]));
+			}
+			
+			return URI.create(builder.toString());
 		}
-		
-		return URI.create(builder.toString());
 	}
 
 	@Override
@@ -70,6 +84,11 @@ public class RegexPathMapper implements IdMapper {
 	            builder.append(File.separator);
 	            builder.append(encode(matcher.group(i)));
 	        }
+
+			if(append_full_pid_to_internal_id == true) {
+				builder.append(File.separator);
+				builder.append(encode(uri));
+			}
 
 	        return URI.create(internalScheme + ":" + builder.toString());
 	        
