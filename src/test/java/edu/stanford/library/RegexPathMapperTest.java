@@ -3,6 +3,8 @@ package edu.stanford.library;
 import static org.junit.Assert.*;
 
 import java.net.URI;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.regex.Pattern;
 
 import org.akubraproject.map.IdMapper;
