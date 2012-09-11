@@ -7,7 +7,8 @@ import java.util.regex.Pattern;
 
 import org.akubraproject.map.IdMapper;
 import org.junit.Test;
-import org.fcrepo.server.storage.lowlevel.akubra.HashPathIdMapper;
+
+import com.yourmediashelf.fedora.akubra.TrivialIdMapper;
 
 public class RegexPathMapperTest {
 
@@ -39,11 +40,11 @@ public class RegexPathMapperTest {
 	    
 	    Pattern pattern = Pattern.compile(patternStr);
 
-		IdMapper fallbackMapper = new HashPathIdMapper("#");
+		IdMapper fallbackMapper = new TrivialIdMapper();
 		
 		IdMapper mapper = new RegexPathMapper(pattern, fallbackMapper);
 		
-		assertEquals(URI.create("file:0/druid%3Aasdfghjk"), mapper.getInternalId(URI.create("druid:asdfghjk")));
+		assertEquals(URI.create("file:druid%3Aasdfghjk"), mapper.getInternalId(URI.create("druid:asdfghjk")));
 	}
 	
 	@Test
